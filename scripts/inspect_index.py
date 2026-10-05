@@ -23,6 +23,7 @@ import datetime as _datetime
 import hashlib
 import json
 import math
+import pathlib
 import sys
 from pathlib import Path
 
@@ -30,6 +31,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import config
 from rag import vectorstore
+
+ROOT = Path(__file__).resolve().parents[1]
 
 RULE = "=" * 78
 THIN = "-" * 78
@@ -53,10 +56,24 @@ def norm(vector: list) -> float:
     return math.sqrt(sum(value * value for value in vector))
 
 
+def rel(path) -> str:
+    """Path relative to the project root, so a committed report is portable.
+
+    This report is committed, and it used to print the absolute CHROMA_DIR and
+    MODEL_CACHE_DIR, which baked the generating machine's home directory and
+    username into a tracked file. Anything that could not be made relative falls
+    back to the basename rather than leaking the parent path.
+    """
+    try:
+        return str(pathlib.Path(path).resolve().relative_to(ROOT))
+    except (ValueError, OSError):
+        return pathlib.Path(path).name
+
+
 def section_summary(out, collection, embedder) -> None:
     out.write(f"{RULE}\nCOLLECTION\n{RULE}\n")
     out.write(f"  name            {config.COLLECTION_NAME}\n")
-    out.write(f"  path            {config.CHROMA_DIR}\n")
+    out.write(f"  path            {rel(config.CHROMA_DIR)}\n")
     out.write(f"  rows            {collection.count()}\n")
     out.write(f"  hnsw:space      {collection.metadata.get('hnsw:space')}\n")
     ef = getattr(collection, "_embedding_function", None)
@@ -69,7 +86,7 @@ def section_embedder(out, embedder) -> None:
     out.write(f"\n{RULE}\nEMBEDDER\n{RULE}\n")
     out.write(f"  model           {embedder.model_id()}\n")
     out.write(f"  dimensions      {embedder.EXPECTED_DIM}\n")
-    out.write(f"  cache dir       {config.MODEL_CACHE_DIR}\n")
+    out.write(f"  cache dir       {rel(config.MODEL_CACHE_DIR)}\n")
     out.write(f"  load time       {embedder.load_seconds():.2f}s\n")
     out.write("  normalised      yes (L2 norm 1.0, so cosine == dot product)\n")
 
