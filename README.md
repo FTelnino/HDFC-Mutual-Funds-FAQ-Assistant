@@ -1,10 +1,11 @@
-# HDFC Mutual Funds FAQ Assistant - https://hdfc-mf-faq-l1vn.onrender.com
+# HDFC Mutual Funds FAQ Assistant 
 
 A retrieval-augmented Q&A assistant over a snapshot corpus of **HDFC mutual fund**
 scheme pages. It answers factual questions about fees, exit loads, minimum
 investment, lock-in, and riskometer level, cites the page it read, shows how old
 that page is, and **refuses** anything that drifts into advice, return
 forecasting, or another AMC's funds.
+app URL - - https://hdfc-mf-faq-l1vn.onrender.com
 
 > **Facts-only. No investment advice.**
 
